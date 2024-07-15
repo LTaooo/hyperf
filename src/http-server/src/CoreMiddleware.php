@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\HttpServer;
 
 use Closure;
@@ -56,7 +57,7 @@ class CoreMiddleware implements CoreMiddlewareInterface
 
     private NormalizerInterface $normalizer;
 
-    public function __construct(protected ContainerInterface $container, string $serverName)
+    public function __construct(protected ContainerInterface $container, private string $serverName)
     {
         $this->dispatcher = $this->createDispatcher($serverName);
         $this->normalizer = $this->container->get(NormalizerInterface::class);
@@ -70,7 +71,7 @@ class CoreMiddleware implements CoreMiddlewareInterface
     {
         $routes = $this->dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
 
-        $dispatched = new Dispatched($routes);
+        $dispatched = new Dispatched($routes, $this->serverName);
 
         return RequestContext::set($request)->setAttribute(Dispatched::class, $dispatched);
     }
@@ -165,7 +166,7 @@ class CoreMiddleware implements CoreMiddlewareInterface
         throw new MethodNotAllowedHttpException('Allow: ' . implode(', ', $methods));
     }
 
-    protected function prepareHandler(string|array $handler): array
+    protected function prepareHandler(array|string $handler): array
     {
         if (is_string($handler)) {
             if (str_contains($handler, '@')) {
@@ -193,6 +194,10 @@ class CoreMiddleware implements CoreMiddlewareInterface
             return $this->response()->addHeader('content-type', 'text/plain')->setBody(new SwooleStream($response));
         }
 
+        if ($response instanceof ResponseInterface) {
+            return new ResponsePlusProxy($response);
+        }
+
         if (is_array($response) || $response instanceof Arrayable) {
             return $this->response()
                 ->addHeader('content-type', 'application/json')
@@ -203,10 +208,6 @@ class CoreMiddleware implements CoreMiddlewareInterface
             return $this->response()
                 ->addHeader('content-type', 'application/json')
                 ->setBody(new SwooleStream((string) $response));
-        }
-
-        if ($response instanceof ResponseInterface) {
-            return new ResponsePlusProxy($response);
         }
 
         if ($this->response()->hasHeader('content-type')) {

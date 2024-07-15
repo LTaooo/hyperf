@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Testing;
 
 use Hyperf\Codec\Packer\JsonPacker;
@@ -44,7 +45,7 @@ class Client extends Server
 
     protected string $baseUri = 'http://127.0.0.1/';
 
-    public function __construct(ContainerInterface $container, PackerInterface $packer = null, $server = 'http')
+    public function __construct(ContainerInterface $container, ?PackerInterface $packer = null, $server = 'http')
     {
         parent::__construct(
             $container,
@@ -145,16 +146,18 @@ class Client extends Server
         return $this->packer->unpack((string) $response->getBody());
     }
 
-    public function request(string $method, string $path, array $options = [])
+    public function request(string $method, string $path, array $options = [], ?callable $callable = null)
     {
-        return wait(function () use ($method, $path, $options) {
+        return wait(function () use ($method, $path, $options, $callable) {
+            $callable && $callable();
             return $this->execute($this->initRequest($method, $path, $options));
         }, $this->waitTimeout);
     }
 
-    public function sendRequest(ServerRequestInterface $psr7Request): ResponseInterface
+    public function sendRequest(ServerRequestInterface $psr7Request, ?callable $callable = null): ResponseInterface
     {
-        return wait(function () use ($psr7Request) {
+        return wait(function () use ($psr7Request, $callable) {
+            $callable && $callable();
             return $this->execute($psr7Request);
         }, $this->waitTimeout);
     }
@@ -207,6 +210,8 @@ class Client extends Server
             $registeredMiddlewares = MiddlewareManager::get($this->serverName, $dispatched->handler->route, $psr7Request->getMethod());
             $middlewares = array_merge($middlewares, $registeredMiddlewares);
         }
+
+        $middlewares = MiddlewareManager::sortMiddlewares($middlewares);
 
         try {
             $psr7Response = $this->dispatcher->dispatch($psr7Request, $middlewares, $this->coreMiddleware);

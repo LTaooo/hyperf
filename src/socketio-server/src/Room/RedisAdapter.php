@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\SocketIOServer\Room;
 
 use Hyperf\Context\ApplicationContext;
@@ -193,9 +194,9 @@ class RedisAdapter implements AdapterInterface, EphemeralInterface
             foreach ($sids as $sid) {
                 $this->del($sid);
             }
-        }
 
-        $this->redis->zRem($this->getExpireKey(), ...$sids);
+            $this->redis->zRem($this->getExpireKey(), ...$sids);
+        }
     }
 
     public function setTtl(int $ms): EphemeralInterface

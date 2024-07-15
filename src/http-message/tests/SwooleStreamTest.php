@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\HttpMessage;
 
 use Hyperf\HttpMessage\Server\Response;
@@ -18,6 +19,7 @@ use Hyperf\HttpServer\ResponseEmitter;
 use Mockery;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
+use Stringable;
 use Swoole\Http\Response as SwooleResponse;
 
 /**
@@ -181,5 +183,12 @@ class SwooleStreamTest extends TestCase
         $this->assertSame($random, $stream->getContents());
 
         $this->assertSame($random, $stream->getContents());
+    }
+
+    public function testInstanceOfStringable()
+    {
+        $random = microtime();
+        $stream = new SwooleStream($random);
+        $this->assertInstanceOf(Stringable::class, $stream);
     }
 }

@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\Amqp\Message;
 
 use Hyperf\Amqp\ConnectionFactory;
@@ -40,7 +41,7 @@ class ConsumerMessageTest extends TestCase
         $channel = Mockery::mock(AMQPChannel::class);
         $channel->shouldReceive('exchange_declare')->andReturnUsing(function (...$args) {
             $this->assertSame('qos', $args[0]);
-            $this->assertSame(Type::TOPIC, $args[1]);
+            $this->assertSame(Type::TOPIC->value, $args[1]);
             $this->assertSame(9, count($args));
         });
         $channel->shouldReceive('queue_declare')->andReturnUsing(function (...$args) {

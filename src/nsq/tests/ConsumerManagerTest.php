@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\Nsq;
 
 use Hyperf\Config\Config;
@@ -85,13 +86,8 @@ class ConsumerManagerTest extends TestCase
             $nums = rand(1, 10),
         ));
 
-        $container->shouldReceive('get')->with(ConfigInterface::class)->andReturn(new Config([
-            'nsq' => [
-                'default' => [
-                    'enable' => false,
-                ],
-            ],
-        ]));
+        $config = $container->get(ConfigInterface::class);
+        $config->set('nsq.default.enable', false);
 
         $manager = new ConsumerManager($container);
         $manager->run();

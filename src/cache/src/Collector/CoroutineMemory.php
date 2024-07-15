@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Cache\Collector;
 
 use Hyperf\Collection\Collection;
@@ -27,7 +28,7 @@ class CoroutineMemory extends Collection
     public function clearPrefix(string $prefix)
     {
         foreach ($this->items as $key => $item) {
-            if (Str::startsWith($prefix, $key)) {
+            if (Str::startsWith($key, $prefix)) {
                 unset($this->items[$key]);
             }
         }

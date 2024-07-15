@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\Testing\Stub;
 
 use Hyperf\Context\Context;
@@ -31,6 +32,13 @@ class FooController
     public function id()
     {
         return ['code' => 0, 'data' => Coroutine::id()];
+    }
+
+    public function context()
+    {
+        return [
+            'request_id' => Context::getOrSet('request_id', uniqid()),
+        ];
     }
 
     public function request()

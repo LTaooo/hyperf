@@ -9,21 +9,42 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\HttpMessage\Server;
 
+use Hyperf\Coroutine\Exception\InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Stringable;
 use Swow\Psr7\Message\ResponsePlusInterface;
 
-class ResponsePlusProxy implements ResponsePlusInterface
+class ResponsePlusProxy implements ResponsePlusInterface, Stringable
 {
     public function __construct(protected ResponseInterface $response)
     {
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toString();
+    }
+
+    public function __call(string $name, array $arguments)
+    {
+        if (str_starts_with($name, 'with')) {
+            return new static($this->response->{$name}(...$arguments));
+        }
+
+        if (str_starts_with($name, 'get')) {
+            return $this->response->{$name}(...$arguments);
+        }
+
+        if (str_starts_with($name, 'set')) {
+            $this->response->{$name}(...$arguments);
+            return $this;
+        }
+
+        throw new InvalidArgumentException(sprintf('The method %s is not supported.', $name));
     }
 
     public function getProtocolVersion(): string
@@ -160,7 +181,7 @@ class ResponsePlusProxy implements ResponsePlusInterface
             $this->getStatusCode(),
             $this->getReasonPhrase(),
             $headerString,
-            $this->getBody()
+            $withoutBody ? '' : $this->getBody()
         );
     }
 

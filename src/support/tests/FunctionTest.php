@@ -9,14 +9,20 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\Support;
 
 use HyperfTest\Support\Exception\RetryException;
+use HyperfTest\Support\Stub\Bar;
+use HyperfTest\Support\Stub\Foo;
 use HyperfTest\Support\Stub\FooClosure;
+use HyperfTest\Support\Stub\Traits\BarTrait;
+use HyperfTest\Support\Stub\Traits\FooTrait;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 
 use function Hyperf\Support\call;
+use function Hyperf\Support\class_uses_recursive;
 use function Hyperf\Support\env;
 use function Hyperf\Support\retry;
 use function Hyperf\Support\swoole_hook_flags;
@@ -53,6 +59,24 @@ class FunctionTest extends TestCase
             });
         } finally {
             $this->assertSame(3, $result);
+        }
+    }
+
+    public function testRetryTimesAsArray()
+    {
+        $this->expectException(RetryException::class);
+        $result = 0;
+        $milliSeconds[] = microtime(true);
+        try {
+            retry([100, 200], function () use (&$result, &$milliSeconds) {
+                ++$result;
+                $milliSeconds[] = microtime(true);
+                throw new RetryException('Retry Test');
+            });
+        } finally {
+            $this->assertSame(3, $result);
+            $this->assertGreaterThanOrEqual(0.1, $milliSeconds[2] - $milliSeconds[1]);
+            $this->assertGreaterThanOrEqual(0.2, $milliSeconds[3] - $milliSeconds[2]);
         }
     }
 
@@ -129,5 +153,22 @@ class FunctionTest extends TestCase
         putenv("{$id}=(null)");
 
         $this->assertNull(env($id));
+    }
+
+    public function testClassUsesRecursive()
+    {
+        $this->assertSame(
+            [
+                FooTrait::class => FooTrait::class,
+            ],
+            class_uses_recursive(Foo::class)
+        );
+        $this->assertSame(
+            [
+                FooTrait::class => FooTrait::class,
+                BarTrait::class => BarTrait::class,
+            ],
+            class_uses_recursive(Bar::class)
+        );
     }
 }

@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Translation;
 
 use Hyperf\Contract\TranslatorLoaderInterface;
@@ -21,17 +22,13 @@ class FileLoader implements TranslatorLoaderInterface
 {
     /**
      * All of the registered paths to JSON translation files.
-     *
-     * @var array
      */
-    protected $jsonPaths = [];
+    protected array $jsonPaths = [];
 
     /**
      * All of the namespace hints.
-     *
-     * @var array
      */
-    protected $hints = [];
+    protected array $hints = [];
 
     /**
      * Create a new file loader instance.
@@ -126,6 +123,7 @@ class FileLoader implements TranslatorLoaderInterface
     /**
      * Load a locale from the given JSON file path.
      *
+     * @return array
      * @throws RuntimeException
      */
     protected function loadJsonPaths(string $locale): iterable

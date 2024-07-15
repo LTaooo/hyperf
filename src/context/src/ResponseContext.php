@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Context;
 
 use Psr\Http\Message\ResponseInterface;
@@ -19,7 +20,7 @@ class ResponseContext
 {
     public static function get(?int $coroutineId = null): ResponsePlusInterface
     {
-        return Context::get(ResponseInterface::class, $coroutineId);
+        return Context::get(ResponseInterface::class, null, $coroutineId);
     }
 
     public static function set(ResponseInterface $response, ?int $coroutineId = null): ResponsePlusInterface
@@ -38,6 +39,6 @@ class ResponseContext
 
     public static function getOrNull(?int $coroutineId = null): ?ResponsePlusInterface
     {
-        return Context::get(ResponseInterface::class, $coroutineId);
+        return Context::get(ResponseInterface::class, null, $coroutineId);
     }
 }

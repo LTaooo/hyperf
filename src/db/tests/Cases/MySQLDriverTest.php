@@ -9,11 +9,14 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\DB\Cases;
 
 use Hyperf\DB\DB;
+use Hyperf\DB\Exception\QueryException;
 use Hyperf\DB\Pool\PoolFactory;
 use PDO;
+use PDOException;
 use PHPUnit\Framework\Attributes\CoversNothing;
 
 /**
@@ -149,5 +152,29 @@ class MySQLDriverTest extends AbstractTestCase
         $this->assertSame(1, $connection->transactionLevel());
         $connection->reconnect();
         $this->assertSame(0, $connection->transactionLevel());
+    }
+
+    public function testThrowException()
+    {
+        $this->getContainer();
+
+        $this->expectException(PDOException::class);
+        $this->expectExceptionMessageMatches('/doesn\'t exist/');
+
+        $res = DB::fetch('SELECT * FROM `user1` WHERE id = ?;', [1]);
+
+        $this->assertSame('Hyperf', $res['name']);
+    }
+
+    public function testThrowExceptionWhenDotOpenExceptionOption()
+    {
+        $this->getContainer([PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, PDO::ATTR_EMULATE_PREPARES => true]);
+
+        $this->expectException(QueryException::class);
+        $this->expectExceptionMessageMatches('/PDO execute failed/');
+
+        $res = DB::fetch('SELECT * FROM `user1` WHERE id = ?;', [1]);
+
+        $this->assertSame('Hyperf', $res['name']);
     }
 }

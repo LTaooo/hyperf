@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\ConfigAliyunAcm;
 
 use GuzzleHttp;
@@ -29,7 +30,7 @@ class Client implements ClientInterface
 
     private LoggerInterface $logger;
 
-    private array $servers;
+    private array $servers = [];
 
     /**
      * @var array[]

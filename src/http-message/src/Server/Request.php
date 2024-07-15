@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\HttpMessage\Server;
 
 use Hyperf\Context\ApplicationContext;
@@ -18,7 +19,6 @@ use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpMessage\Upload\UploadedFile;
 use Hyperf\HttpMessage\Uri\Uri;
 use InvalidArgumentException;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
@@ -54,7 +54,7 @@ class Request extends \Hyperf\HttpMessage\Base\Request implements ServerRequestI
     /**
      * Load a swoole request, and transfer to a psr-7 request object.
      *
-     * @return \Hyperf\HttpMessage\Server\Request
+     * @return Request
      */
     public static function loadFromSwooleRequest(Swoole\Http\Request $swooleRequest)
     {
@@ -222,7 +222,7 @@ class Request extends \Hyperf\HttpMessage\Base\Request implements ServerRequestI
      * @return null|array|object The deserialized body parameters, if any.
      *                           These will typically be an array or object.
      */
-    public function getParsedBody(): array|object|null
+    public function getParsedBody(): null|array|object
     {
         return $this->parsedBody;
     }
@@ -435,7 +435,7 @@ class Request extends \Hyperf\HttpMessage\Base\Request implements ServerRequestI
         return $this;
     }
 
-    public function setParsedBody(object|array|null $data): static
+    public function setParsedBody(null|array|object $data): static
     {
         $this->parsedBody = $data;
         return $this;
@@ -464,7 +464,7 @@ class Request extends \Hyperf\HttpMessage\Base\Request implements ServerRequestI
         return $this;
     }
 
-    protected static function normalizeParsedBody(array $data = [], ?RequestInterface $request = null): array
+    protected static function normalizeParsedBody(array $data = [], ?ServerRequestInterface $request = null): array
     {
         if (! $request) {
             return $data;
@@ -484,7 +484,9 @@ class Request extends \Hyperf\HttpMessage\Base\Request implements ServerRequestI
                 $data = $parser->parse($content, $contentType);
             }
         } catch (InvalidArgumentException $exception) {
-            throw new BadRequestHttpException($exception->getMessage());
+            throw new BadRequestHttpException($exception->getMessage(), request: $request);
+        } catch (BadRequestHttpException $exception) {
+            throw $exception->setRequest($request);
         }
 
         return $data;

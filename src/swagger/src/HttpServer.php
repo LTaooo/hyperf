@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Swagger;
 
 use Hyperf\Codec\Json;
@@ -53,11 +54,13 @@ class HttpServer implements OnRequestInterface
         $path = $psr7Request->getUri()->getPath();
         if ($path === $this->config['url']) {
             $stream = new Stream($this->getHtml());
+            $contentType = 'text/html;charset=utf-8';
         } else {
             $stream = new Stream($this->getMetadata($path));
+            $contentType = 'application/json;charset=utf-8';
         }
 
-        $psrResponse = (new Response())->withBody($stream);
+        $psrResponse = (new Response())->setBody($stream)->setHeader('content-type', $contentType);
 
         $this->emitter->emit($psrResponse, $response);
     }

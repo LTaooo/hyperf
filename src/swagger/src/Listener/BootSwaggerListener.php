@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Swagger\Listener;
 
 use Hyperf\Contract\ConfigInterface;
@@ -62,7 +63,7 @@ class BootSwaggerListener implements ListenerInterface
         }
 
         $servers[] = [
-            'name' => uniqid(),
+            'name' => 'swagger_' . uniqid(),
             'type' => Server::SERVER_HTTP,
             'host' => '0.0.0.0',
             'port' => $port,

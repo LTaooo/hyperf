@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\LoadBalancer;
 
 use Hyperf\Coordinator\Constants;
@@ -68,5 +69,11 @@ class RandomTest extends TestCase
         CoordinatorManager::until(Constants::WORKER_EXIT)->resume();
         CoordinatorManager::clear(Constants::WORKER_EXIT);
         $random->clearAfterRefreshedCallbacks();
+    }
+
+    public function testFunctionMakeExists()
+    {
+        $this->assertFalse(function_exists('make'));
+        $this->assertTrue(function_exists('Hyperf\Support\make'));
     }
 }

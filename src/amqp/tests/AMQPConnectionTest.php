@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\Amqp;
 
 use Hyperf\Amqp\ConnectionFactory;
@@ -47,7 +48,7 @@ class AMQPConnectionTest extends TestCase
         $container = ContainerStub::getContainer();
         $connection = (new ConnectionFactory($container))->make([]);
         $channel = $connection->getChannel();
-        $channel->exchange_declare('test', Type::TOPIC);
+        $channel->exchange_declare('test', Type::TOPIC->value);
         $this->assertNull($connection->close());
     }
 
@@ -60,7 +61,7 @@ class AMQPConnectionTest extends TestCase
             ],
         ]);
         $channel = $connection->getChannel();
-        $channel->exchange_declare('test', Type::TOPIC);
+        $channel->exchange_declare('test', Type::TOPIC->value);
 
         CoordinatorManager::until(Constants::WORKER_EXIT)->resume();
         CoordinatorManager::clear(Constants::WORKER_EXIT);

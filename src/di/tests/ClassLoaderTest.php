@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\Di;
 
 use Hyperf\Di\ClassLoader;
@@ -23,10 +24,6 @@ use function Hyperf\Support\env;
  * @coversNothing
  */
 #[CoversNothing]
-/**
- * @internal
- * @coversNothing
- */
 class ClassLoaderTest extends TestCase
 {
     public function testDotEnv()

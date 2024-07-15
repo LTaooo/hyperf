@@ -9,11 +9,13 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\SocketIOServer\Emitter;
 
 use Hyperf\Engine\Channel;
 use Hyperf\Engine\Contract\WebSocket\FrameInterface;
 use Hyperf\Engine\WebSocket\Frame;
+use Hyperf\Engine\WebSocket\Opcode;
 use Hyperf\SocketIOServer\SocketIO;
 use Hyperf\WebSocketServer\Sender;
 
@@ -28,6 +30,9 @@ class Future
 
     private bool $sent;
 
+    /**
+     * @param int $flag deprecated it will be removed in v3.2 or v4.0
+     */
     public function __construct(
         private SocketIO $socketIO,
         private Sender $sender,
@@ -35,8 +40,8 @@ class Future
         private string $event,
         private array $data,
         callable $encode,
-        private int $opcode,
-        private int $flag,
+        private int $opcode = Opcode::TEXT,
+        private int $flag = 0,
         private ?FrameInterface $frame = null
     ) {
         $this->id = '';

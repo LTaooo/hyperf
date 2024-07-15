@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace HyperfTest\Session;
 
 use Carbon\Carbon;
@@ -28,6 +29,7 @@ use Hyperf\Stringable\Str;
 use Hyperf\Support\Filesystem\Filesystem;
 use HyperfTest\Session\Stub\FooHandler;
 use Mockery;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -39,8 +41,8 @@ use SessionHandlerInterface;
  * @internal
  * @coversNothing
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(\Hyperf\Session\Middleware\SessionMiddleware::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(\Hyperf\Session\SessionManager::class)]
+#[CoversClass(SessionMiddleware::class)]
+#[CoversClass(SessionManager::class)]
 /**
  * @internal
  * @coversNothing
@@ -71,6 +73,7 @@ class SessionMiddlewareTest extends TestCase
         $config->shouldReceive('get')->with('session.options.session_name', 'HYPERF_SESSION_ID')->andReturn('HYPERF_SESSION_ID');
         $config->shouldReceive('get')->with('session.options.domain')->andReturn(null);
         $config->shouldReceive('get')->with('session.options.cookie_lifetime', 5 * 60)->andReturn(5 * 60);
+        $config->shouldReceive('get')->with('session.options.cookie_same_site')->andReturn(null);
 
         $sessionManager = new SessionManager($container, $config);
         $middleware = new SessionMiddleware($sessionManager, $config);
@@ -117,6 +120,7 @@ class SessionMiddlewareTest extends TestCase
         $config->shouldReceive('get')->with('session.options.session_name', 'HYPERF_SESSION_ID')->andReturn('HYPERF_SESSION_ID');
         $config->shouldReceive('get')->with('session.options.domain')->andReturn(null);
         $config->shouldReceive('get')->with('session.options.cookie_lifetime', 5 * 60 * 60)->andReturn(10 * 60 * 60);
+        $config->shouldReceive('get')->with('session.options.cookie_same_site')->andReturn(null);
 
         $sessionManager = new SessionManager($container, $config);
         $middleware = new SessionMiddleware($sessionManager, $config);
@@ -243,6 +247,8 @@ class SessionMiddlewareTest extends TestCase
         $config->shouldReceive('get')->with('session.options.expire_on_close')->andReturn(0);
         $config->shouldReceive('get')->with('session.options.domain')->andReturn(null);
         $config->shouldReceive('get')->with('session.options.cookie_lifetime', 5 * 60 * 60)->andReturn(5 * 60);
+        $config->shouldReceive('get')->with('session.options.cookie_same_site')->andReturn(null);
+
         $middleware = new SessionMiddleware(Mockery::mock(SessionManager::class), $config);
         $ref = new ReflectionClass($middleware);
         $method = $ref->getMethod('addCookieToResponse');

@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\HttpMessage\Server;
 
 use Hyperf\Engine\Contract\Http\Writable;
@@ -45,6 +46,15 @@ class Response extends \Hyperf\HttpMessage\Base\Response implements Chunkable
         $clone = clone $this;
         $clone->cookies[$cookie->getDomain()][$cookie->getPath()][$cookie->getName()] = $cookie;
         return $clone;
+    }
+
+    /**
+     * Returns an instance with specified cookies.
+     */
+    public function setCookie(Cookie $cookie): static
+    {
+        $this->cookies[$cookie->getDomain()][$cookie->getPath()][$cookie->getName()] = $cookie;
+        return $this;
     }
 
     /**

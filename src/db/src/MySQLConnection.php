@@ -9,15 +9,20 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\DB;
 
 use Closure;
+use Hyperf\Codec\Json;
+use Hyperf\DB\Exception\QueryException;
 use Hyperf\Pool\Exception\ConnectionException;
 use Hyperf\Pool\Pool;
 use PDO;
 use PDOStatement;
 use Psr\Container\ContainerInterface;
 use Throwable;
+
+use function Hyperf\Support\build_sql;
 
 class MySQLConnection extends AbstractConnection
 {
@@ -108,10 +113,16 @@ class MySQLConnection extends AbstractConnection
         // of the database result set. Each element in the array will be a single
         // row from the database table, and will either be an array or objects.
         $statement = $this->connection->prepare($query);
+        if (! $statement) {
+            throw new QueryException('PDO prepare failed ' . sprintf('(SQL: %s)', build_sql($query, $bindings)));
+        }
 
         $this->bindValues($statement, $bindings);
 
-        $statement->execute();
+        $res = $statement->execute();
+        if (! $res) {
+            throw new QueryException('PDO execute failed ' . sprintf('(ERR: [%s](%s)) (SQL: %s)', $statement->errorCode(), Json::encode($statement->errorCode()), build_sql($query, $bindings)));
+        }
 
         $fetchMode = $this->config['fetch_mode'];
 
@@ -131,7 +142,10 @@ class MySQLConnection extends AbstractConnection
 
         $this->bindValues($statement, $bindings);
 
-        $statement->execute();
+        $res = $statement->execute();
+        if (! $res) {
+            throw new QueryException('PDO execute failed ' . sprintf('(ERR: [%s](%s)) (SQL: %s)', $statement->errorCode(), Json::encode($statement->errorCode()), build_sql($query, $bindings)));
+        }
 
         return $statement->rowCount();
     }
@@ -147,7 +161,10 @@ class MySQLConnection extends AbstractConnection
 
         $this->bindValues($statement, $bindings);
 
-        $statement->execute();
+        $res = $statement->execute();
+        if (! $res) {
+            throw new QueryException('PDO execute failed ' . sprintf('(ERR: [%s](%s)) (SQL: %s)', $statement->errorCode(), Json::encode($statement->errorCode()), build_sql($query, $bindings)));
+        }
 
         return (int) $this->connection->lastInsertId();
     }

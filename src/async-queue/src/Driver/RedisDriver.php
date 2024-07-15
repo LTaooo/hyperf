@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\AsyncQueue\Driver;
 
 use Hyperf\AsyncQueue\Exception\InvalidQueueException;
@@ -63,7 +64,7 @@ class RedisDriver extends Driver
             return (bool) $this->redis->lPush($this->channel->getWaiting(), $data);
         }
 
-        return $this->redis->zAdd($this->channel->getDelayed(), time() + $delay, $data) > 0;
+        return (bool) $this->redis->zAdd($this->channel->getDelayed(), time() + $delay, $data);
     }
 
     public function delete(JobInterface $job): bool
@@ -85,12 +86,13 @@ class RedisDriver extends Driver
         }
 
         $data = $res[1];
+
+        $this->redis->zadd($this->channel->getReserved(), time() + $this->handleTimeout, $data);
+
         $message = $this->packer->unpack($data);
         if (! $message) {
             return [false, null];
         }
-
-        $this->redis->zadd($this->channel->getReserved(), time() + $this->handleTimeout, $data);
 
         return [$data, $message];
     }
@@ -108,7 +110,7 @@ class RedisDriver extends Driver
         return false;
     }
 
-    public function reload(string $queue = null): int
+    public function reload(?string $queue = null): int
     {
         $channel = $this->channel->getFailed();
         if ($queue) {
@@ -126,7 +128,7 @@ class RedisDriver extends Driver
         return $num;
     }
 
-    public function flush(string $queue = null): bool
+    public function flush(?string $queue = null): bool
     {
         $channel = $this->channel->getFailed();
         if ($queue) {
@@ -152,7 +154,7 @@ class RedisDriver extends Driver
 
         $delay = time() + $this->getRetrySeconds($message->getAttempts());
 
-        return $this->redis->zAdd($this->channel->getDelayed(), $delay, $data) > 0;
+        return (bool) $this->redis->zAdd($this->channel->getDelayed(), $delay, $data);
     }
 
     protected function getRetrySeconds(int $attempts): int
@@ -173,7 +175,7 @@ class RedisDriver extends Driver
      */
     protected function remove(mixed $data): bool
     {
-        return $this->redis->zrem($this->channel->getReserved(), (string) $data) > 0;
+        return (bool) $this->redis->zrem($this->channel->getReserved(), (string) $data);
     }
 
     /**
@@ -185,7 +187,7 @@ class RedisDriver extends Driver
         $options = ['LIMIT' => [0, 100]];
         if ($expired = $this->redis->zrevrangebyscore($from, (string) $now, '-inf', $options)) {
             foreach ($expired as $job) {
-                if ($this->redis->zRem($from, $job) > 0) {
+                if ($this->redis->zRem($from, $job)) {
                     $this->redis->lPush($to, $job);
                 }
             }

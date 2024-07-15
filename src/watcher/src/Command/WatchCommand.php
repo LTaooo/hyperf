@@ -9,10 +9,11 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Watcher\Command;
 
 use Hyperf\Command\Command;
-use Hyperf\Command\NullDisableEventDispatcher;
+use Hyperf\Command\Concerns\NullDisableEventDispatcher;
 use Hyperf\Watcher\Option;
 use Hyperf\Watcher\Watcher;
 use Psr\Container\ContainerInterface;

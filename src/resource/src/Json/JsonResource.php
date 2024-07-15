@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @contact  group@hyperf.io
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
+
 namespace Hyperf\Resource\Json;
 
 use ArrayAccess;
@@ -21,11 +22,10 @@ use Hyperf\Resource\JsonEncodingException;
 use Hyperf\Resource\Response\Response;
 use JsonSerializable;
 use Psr\Http\Message\ResponseInterface;
-use Stringable;
 
 use function Hyperf\Tappable\tap;
 
-class JsonResource implements ArrayAccess, JsonSerializable, Arrayable, Jsonable, ResponseInterface, Stringable
+class JsonResource implements ArrayAccess, JsonSerializable, Arrayable, Jsonable, ResponseInterface
 {
     use ConditionallyLoadsAttributes;
     use DelegatesToResource;
